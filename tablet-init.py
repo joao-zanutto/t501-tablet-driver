@@ -36,17 +36,14 @@ def main():
 
     fd = os.open(dev, os.O_RDWR)
 
-    # Output report: report ID 0x02
-    os.write(fd, bytes.fromhex("0200"))
-
     # Feature reports (report ID 0x08) — captured from Windows driver USB traffic
+    # Subcommand 0x06 with byte 0x01 enables config mode
+    # Subcommand 0x01 sets the active area range to full surface
+    # Subcommand 0x06 with byte 0x00 exits config mode and restores buttons
     for cmd in [
-        "08041d01ffff066b",
-        "0806010000000000",
+        "0806010000000000",  # enter config mode
         "080100fff000fff0",  # set full area
-        "0807000000ffffff",
-        "080100fff000fff0",  # set full area
-        "0806010000000000",
+        "0806000000000000",  # exit config mode (restores buttons)
     ]:
         buf = bytearray(bytes.fromhex(cmd))
         fcntl.ioctl(fd, hidiocsfeature(len(buf)), buf)
